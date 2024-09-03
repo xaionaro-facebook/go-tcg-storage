@@ -5,10 +5,12 @@
 package main
 
 import (
+	"encoding/hex"
 	"log"
 
 	"github.com/alecthomas/kong"
 	"github.com/open-source-firmware/go-tcg-storage/pkg/core"
+	"github.com/open-source-firmware/go-tcg-storage/pkg/core/uid"
 	"github.com/open-source-firmware/go-tcg-storage/pkg/locking"
 	// TODO: Move to locking API when it has MBR functions
 )
@@ -76,13 +78,27 @@ func main() {
 			log.Fatalf("Unknown hash method %q", cli.Hash)
 		}
 	}
-	if cli.User != "" {
+	switch {
+	case cli.User != "" && cli.UserUID != "":
+		log.Fatalf("flags -u and -i are mutually exclusive")
+	case cli.User != "":
 		var ok bool
 		auth, ok = locking.AuthorityFromName(cli.User, pin)
 		if !ok {
 			log.Fatalf("Authority %q is not known for this device", cli.User)
 		}
-	} else {
+	case cli.UserUID != "":
+		uidBytes, err := hex.DecodeString(cli.UserUID)
+		if err != nil {
+			log.Fatalf("The -i value is not a valid HEX: %v", err)
+		}
+		var objUID uid.AuthorityObjectUID
+		if len(uidBytes) != len(objUID) {
+			log.Fatalf("Wrong byte-length of the UID: expected:%d, received:%d (%X)", len(objUID), len(uidBytes), uidBytes)
+		}
+		copy(objUID[:], uidBytes)
+		auth = locking.AuthorityFromUID(objUID, pin)
+	default:
 		if len(pin) == 0 {
 			auth = locking.DefaultAuthorityWithMSID
 		} else {

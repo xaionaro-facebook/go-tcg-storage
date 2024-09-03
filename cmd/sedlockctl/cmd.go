@@ -36,6 +36,7 @@ var cli struct {
 	Sidpinmsid bool         `flag:"" optional:""`
 	Sidhash    string       `flag:"" optional:""`
 	User       string       `flag:"" optional:"" short:"u"`
+	UserUID    string       `flag:"" optional:"" short:"i" help:"The AuthorityObjectUID provided as a HEX value (mutually exclusive with -u)"`
 	Password   string       `flag:"" optional:"" short:"p"`
 	Hash       string       `flag:"" optional:"" default:"sedutil-dta"`
 	List       listCmd      `cmd:"" help:"List all ranges (default)"`

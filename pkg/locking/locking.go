@@ -108,6 +108,14 @@ func AuthorityFromName(user string, proof []byte) (*authority, bool) {
 	return nil, false
 }
 
+// AuthorityFromUID builds an authority for a specified AuthorityObjectUID with the provided a proof.
+func AuthorityFromUID(uid uid.AuthorityObjectUID, proof []byte) *authority {
+	return &authority{
+		auth:  uid[:],
+		proof: proof,
+	}
+}
+
 func NewSession(cs *core.ControlSession, lmeta *LockingSPMeta, auth LockingSPAuthenticator, opts ...core.SessionOpt) (*LockingSP, error) {
 	if lmeta.D0.Locking == nil {
 		return nil, fmt.Errorf("device does not have the Locking feature")
